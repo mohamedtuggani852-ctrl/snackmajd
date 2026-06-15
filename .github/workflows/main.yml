@@ -10,5 +10,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Grant execute permission
+        run: chmod +x ./NOVA\ \(1\)/SnackMajdAPK/gradlew
+
       - name: Build APK
-        run: echo "Build started"
+        run: |
+          cd "NOVA (1)/SnackMajdAPK"
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SnackMajd-APK
+          path: NOVA (1)/SnackMajdAPK/app/build/outputs/apk/debug/*.apk
