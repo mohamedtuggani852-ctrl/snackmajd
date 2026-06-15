@@ -28,10 +28,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Build Debug APK
-        run: |
-          cd "NOVA (1)/SnackMajdAPK"
-          chmod +x gradlew
-          ./gradlew assembleDebug
+        run: gradle -p "NOVA (1)/SnackMajdAPK" assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
