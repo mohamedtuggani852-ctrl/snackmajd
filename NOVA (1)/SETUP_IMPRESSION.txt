@@ -1,0 +1,79 @@
+=============================================
+  SNACK MAJD - SETUP IMPRESSION DIRECTE
+=============================================
+
+ETAPE 1: Installer Termux sur la tablette Android
+--------------------------------------------------
+- Ouvrez le navigateur sur la tablette
+- Allez sur: f-droid.org
+- Cherchez "Termux" et installez-le
+  (N'utilisez PAS le Play Store - version ancienne)
+
+ETAPE 2: Installer Python dans Termux
+--------------------------------------
+Ouvrez Termux et tapez ces commandes une par une:
+
+  pkg update -y
+  pkg install python -y
+
+ETAPE 3: Copier print_server.py sur la tablette
+-------------------------------------------------
+- Connectez la tablette au PC via USB
+- Copiez le fichier "print_server.py" sur la tablette
+  (par exemple dans le dossier Telechargements)
+
+ETAPE 4: Trouver l'IP de l'imprimante
+---------------------------------------
+- Sur l'imprimante: imprimez une "page de configuration"
+  (maintenez le bouton d'alimentation 3-5 secondes)
+- L'IP ressemble a: 192.168.X.XXX
+
+ETAPE 5: Lancer le serveur d'impression
+-----------------------------------------
+Dans Termux, naviguez vers le dossier et lancez:
+
+  cd /sdcard/Download
+  python print_server.py
+
+  (IP deja configuree: 192.168.0.100)
+
+ETAPE 6: Ouvrir l'application caisse
+--------------------------------------
+- Ouvrez "snack_majd_caisse.html" dans Chrome
+- Cliquez sur le bouton ⚙️ (parametres)
+- Entrez l'IP de l'imprimante
+- Cliquez "Test impression" - ca doit imprimer!
+- Le point vert a cote de ⚙️ = serveur connecte
+
+=============================================
+UTILISATION QUOTIDIENNE
+=============================================
+
+Chaque jour:
+1. Ouvrez Termux
+2. Lancez: python print_server.py 192.168.X.XXX
+3. Minimisez Termux (ne fermez pas!)
+4. Ouvrez l'application caisse
+
+Quand vous cliquez "TIKIT + KHELES":
+- Si serveur actif (point vert): impression directe ✅
+- Si serveur non actif (point rouge): dialog Android normal
+
+=============================================
+PROBLEMES COURANTS
+=============================================
+
+"Erreur connexion imprimante":
+- Verifiez que tablette et imprimante sont sur le meme WiFi
+- Verifiez l'IP de l'imprimante (reimprimer page config)
+
+"Serveur non actif":
+- Verifiez que Termux est ouvert et le script tourne
+- Relancez: python print_server.py [IP_IMPRIMANTE]
+
+"Texte mal imprime":
+- Changez la largeur papier dans les parametres:
+  80mm = 42 caracteres
+  58mm = 32 caracteres
+
+=============================================

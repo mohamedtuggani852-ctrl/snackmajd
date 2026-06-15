@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Snack Majd — Caisse</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Snack Majd">
+<link rel="apple-touch-icon" id="ati" href="">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f5c518">
+<link rel="manifest" id="mfst" href="">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#111;color:#fff;display:flex;flex-direction:column;height:100dvh;touch-action:pan-y}
+button{touch-action:manipulation;cursor:pointer;-webkit-user-select:none;user-select:none}
+
+.header{background:#f5c518;padding:8px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 8px #0008;padding-top:max(8px,env(safe-area-inset-top))}
+.header h1{font-size:16px;color:#000;font-weight:900;white-space:nowrap}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.dt{color:#000;font-size:11px;font-weight:600;white-space:nowrap}
+.hdr-total{background:#000;color:#27ae60;padding:5px 10px;border-radius:16px;font-weight:900;font-size:12px;white-space:nowrap}
+.btn-hdr{background:#000;color:#f5c518;border:none;padding:8px 12px;border-radius:20px;font-weight:900;font-size:12px;white-space:nowrap;min-height:36px}
+.btn-hdr:active{background:#333}
+#btn-install{display:none;align-items:center;gap:5px;background:#27ae60;color:#fff;border:none;padding:8px 12px;border-radius:20px;font-weight:900;font-size:12px;white-space:nowrap;min-height:36px}
+#btn-install:active{background:#219a52}
+.btn-settings{background:#333;color:#f5c518;border:none;padding:8px 11px;border-radius:20px;font-size:14px;min-height:36px}
+.btn-settings:active{background:#555}
+.srv-dot{width:8px;height:8px;border-radius:50%;background:#e74c3c;display:inline-block;margin-left:4px;transition:background .3s}
+.srv-dot.on{background:#27ae60} 
+
+.main{display:grid;grid-template-columns:1fr 380px;flex:1;overflow:hidden;min-height:0}
+
+.menu-panel{display:flex;flex-direction:column;overflow:hidden;background:#0e0e0e}
+.cats{display:flex;overflow-x:auto;background:#1a1a1a;padding:8px;gap:6px;flex-shrink:0;border-bottom:2px solid #f5c518;-webkit-overflow-scrolling:touch}
+.cats::-webkit-scrollbar{height:3px}
+.cats::-webkit-scrollbar-thumb{background:#f5c518;border-radius:2px}
+.cat-btn{background:#222;color:#f5c518;border:2px solid #444;padding:9px 16px;border-radius:22px;white-space:nowrap;font-size:13px;font-weight:bold;transition:.15s;min-height:42px}
+.cat-btn.active,.cat-btn:active{background:#f5c518;color:#000;border-color:#f5c518}
+.items-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.items-grid::-webkit-scrollbar{width:4px}
+.items-grid::-webkit-scrollbar-thumb{background:#333;border-radius:2px}
+.menu-card{background:#1c1c1c;border:1px solid #2e2e2e;border-radius:12px;padding:12px;transition:.15s}
+.menu-card:active{border-color:#f5c518;background:#222;transform:scale(.98)}
+.menu-card h3{font-size:13px;margin-bottom:10px;color:#eee;line-height:1.4}
+.size-btns{display:flex;gap:6px}
+.size-btn{flex:1;background:#252525;color:#f5c518;border:1px solid #f5c518;padding:8px 4px;border-radius:8px;font-size:12px;font-weight:bold;min-height:42px;transition:.15s}
+.size-btn:active{background:#f5c518;color:#000}
+.single-btn{width:100%;background:#f5c518;color:#000;border:none;padding:8px;border-radius:8px;font-weight:bold;font-size:13px;min-height:42px;transition:.15s}
+.single-btn:active{background:#ffe040}
+
+.order-panel{border-left:2px solid #2a2a2a;display:flex;flex-direction:column;background:#131313;overflow:hidden}
+.order-hdr{background:#f5c518;flex-shrink:0}
+.order-hdr-top{padding:10px 14px;display:flex;justify-content:space-between;align-items:center}
+.order-hdr h2{font-size:15px;font-weight:900;color:#000}
+.btn-pick-table{background:#000;color:#f5c518;border:2px solid #000;padding:8px 14px;border-radius:22px;font-weight:900;font-size:13px;display:flex;align-items:center;gap:6px;min-height:42px;transition:.15s}
+.btn-pick-table.has-table{background:#1a5c1a;color:#fff;border-color:#27ae60}
+.btn-pick-table:active{opacity:.8}
+.pending-banner{background:#2c1e00;border-top:2px solid #f5a518;padding:6px 14px;font-size:11px;color:#f5c518}
+.pending-banner.hidden{display:none}
+.order-list{flex:1;overflow-y:auto;padding:8px;-webkit-overflow-scrolling:touch}
+.order-list::-webkit-scrollbar{width:4px}
+.order-list::-webkit-scrollbar-thumb{background:#333}
+.empty-msg{text-align:center;color:#444;margin-top:30px;font-size:13px;line-height:2}
+.empty-msg span{display:block;font-size:32px;margin-bottom:6px}
+.order-row{background:#1e1e1e;border-radius:10px;padding:10px;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.row-info{flex:1;min-width:0}
+.row-name{font-size:13px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row-price{color:#f5c518;font-size:12px;margin-top:3px}
+.qty-ctrl{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.q-btn{background:#2a2a2a;color:#fff;border:1px solid #444;width:32px;height:32px;border-radius:50%;font-size:16px;display:flex;align-items:center;justify-content:center;font-weight:bold;transition:.1s}
+.q-btn:active{background:#f5c518;color:#000}
+.q-num{font-weight:900;font-size:15px;min-width:24px;text-align:center}
+.del-btn{background:#7b1e1e;color:#fff;border:none;width:30px;height:30px;border-radius:50%;font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.del-btn:active{background:#e74c3c}
+.order-foot{border-top:2px solid #2a2a2a;padding:10px 12px;flex-shrink:0}
+.foot-row{display:flex;justify-content:space-between;font-size:12px;color:#777;margin-bottom:3px}
+.foot-total{display:flex;justify-content:space-between;font-size:22px;font-weight:900;color:#f5c518;margin:7px 0 9px}
+.btn-tikit{width:100%;background:linear-gradient(135deg,#1a4a8a,#2980b9);color:#fff;border:none;padding:14px;border-radius:10px;font-weight:900;font-size:16px;margin-bottom:8px;min-height:50px;transition:.15s}
+.btn-tikit:active{opacity:.85;transform:scale(.99)}
+.btn-tikit:disabled{background:#222;color:#444}
+.act-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-kheles{background:linear-gradient(135deg,#196b19,#27ae60);color:#fff;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;min-height:42px;transition:.15s}
+.btn-kheles:active{opacity:.85}
+.btn-kheles:disabled{background:#222;color:#444}
+.btn-clear{background:#7b1e1e;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:bold;font-size:12px;min-height:42px;transition:.15s}
+.btn-clear:active{background:#c0392b}
+
+.tab-bar{display:none;background:#1a1a1a;border-top:2px solid #f5c518;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom)}
+.tab-btn{flex:1;padding:12px 8px;background:none;color:#555;border:none;font-size:11px;font-weight:bold;border-top:3px solid transparent;min-height:52px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab-btn .tab-icon{font-size:20px}
+.tab-btn.active{color:#f5c518;border-top-color:#f5c518}
+.tab-badge{background:#f5c518;color:#000;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:900}
+
+@media (orientation: portrait){
+  .main{grid-template-columns:1fr;grid-template-rows:1fr}
+  .order-panel{display:none;border-left:none;border-top:2px solid #2a2a2a}
+  .order-panel.portrait-active{display:flex}
+  .menu-panel.portrait-hidden{display:none}
+  .tab-bar{display:flex}
+  .header h1{font-size:14px}
+  .dt{display:none}
+}
+
+#tbl-picker{display:none;position:fixed;inset:0;background:#0a0a0af0;z-index:500;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+#tbl-picker.open{display:flex}
+.picker-hdr{background:#f5c518;padding:12px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;padding-top:max(12px,env(safe-area-inset-top))}
+.picker-hdr h2{color:#000;font-size:17px;font-weight:900;flex:1}
+.picker-search{background:#fff;border:none;padding:10px 14px;border-radius:22px;font-size:15px;outline:none;width:140px;font-weight:bold;min-height:44px}
+.btn-close-picker{background:#000;color:#f5c518;border:none;padding:10px 16px;border-radius:22px;font-weight:900;font-size:14px;min-height:44px}
+.btn-close-picker:active{background:#333}
+.picker-legend{display:flex;gap:14px;padding:7px 16px;background:#141414;flex-shrink:0;font-size:12px;border-bottom:1px solid #222}
+.leg{display:flex;align-items:center;gap:6px;color:#aaa}
+.leg-box{width:14px;height:14px;border-radius:4px;flex-shrink:0}
+.picker-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:9px;padding:14px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+@media (orientation: landscape){.picker-grid{grid-template-columns:repeat(10,1fr)}}
+.picker-grid::-webkit-scrollbar{width:5px}
+.picker-grid::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+.ptbl{background:#122112;border:2px solid #1e421e;border-radius:12px;padding:14px 6px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;min-height:70px;transition:.15s}
+.ptbl:active{transform:scale(.94);border-color:#f5c518}
+.ptbl.occupied{background:#2c1e08;border-color:#5a3a10}
+.ptbl.active-tbl{border-color:#f5c518;background:#2e2600;box-shadow:0 0 14px #f5c51866}
+.ptbl-num{font-size:20px;font-weight:900;color:#fff;line-height:1}
+.ptbl-status{font-size:10px;font-weight:bold}
+.ptbl.occupied .ptbl-num{color:#f5c518}
+.ptbl.occupied .ptbl-status{color:#f5a518}
+.ptbl:not(.occupied):not(.active-tbl) .ptbl-status{color:#4caf50}
+.ptbl.active-tbl .ptbl-num,.ptbl.active-tbl .ptbl-status{color:#f5c518}
+
+#dashboard{display:none;position:fixed;inset:0;background:#0d0d0df0;z-index:600;flex-direction:column;padding-bottom:env(safe-area-inset-bottom)}
+#dashboard.open{display:flex}
+.dash-hdr{background:#f5c518;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;padding-top:max(10px,env(safe-area-inset-top))}
+.dash-hdr h2{color:#000;font-size:16px;font-weight:900;flex:1}
+.dash-nav{display:flex;align-items:center;gap:6px}
+.dash-nav-btn{background:#0003;color:#000;border:none;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center}
+.dash-day-label{background:#000;color:#f5c518;padding:5px 14px;border-radius:20px;font-weight:900;font-size:13px;min-width:120px;text-align:center}
+.dash-hdr-btns{display:flex;gap:6px;flex-wrap:wrap}
+.dash-btn{border:none;padding:8px 12px;border-radius:20px;font-weight:bold;font-size:12px;min-height:38px;white-space:nowrap}
+.dash-btn.dark{background:#000;color:#f5c518}.dash-btn.dark:active{background:#333}
+.dash-btn.green{background:#196b19;color:#fff}.dash-btn.green:active{background:#27ae60}
+.dash-btn.outline{background:#1a1a1a;color:#f5c518;border:1px solid #f5c518}.dash-btn.outline:active{background:#f5c518;color:#000}
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:12px 16px;flex-shrink:0;background:#141414;border-bottom:2px solid #222}
+@media (max-width:600px){.dash-stats{grid-template-columns:repeat(2,1fr)}}
+.stat-card{background:#1e1e1e;border:1px solid #2e2e2e;border-radius:12px;padding:12px;text-align:center}
+.s-label{font-size:10px;color:#777;margin-bottom:5px;text-transform:uppercase;letter-spacing:.8px}
+.s-val{font-size:24px;font-weight:900;color:#f5c518}
+.s-val.green{color:#27ae60}
+.s-unit{font-size:11px;color:#888;margin-top:2px}
+.dash-body{flex:1;overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch}
+.dash-body::-webkit-scrollbar{width:4px}
+.dash-body::-webkit-scrollbar-thumb{background:#333}
+.dash-empty{text-align:center;color:#444;margin-top:60px;font-size:16px;line-height:2.5}
+.trans-table{width:100%;border-collapse:collapse;font-size:13px}
+.trans-table th{background:#1a1a1a;color:#f5c518;padding:10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;position:sticky;top:0;z-index:1}
+.trans-table td{padding:9px 10px;border-bottom:1px solid #1a1a1a;vertical-align:middle}
+.trans-table tr:active td{background:#171717}
+.tx-id{color:#555;font-size:11px}
+.tx-time{color:#999;font-size:12px}
+.tx-tbl{background:#f5c518;color:#000;border-radius:6px;padding:3px 8px;font-weight:900;font-size:12px}
+.tx-items{color:#bbb;font-size:11px;line-height:1.7;max-width:280px}
+.tx-total{color:#27ae60;font-weight:900;font-size:15px;white-space:nowrap}
+.tx-type{font-size:10px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:bold}
+.tx-type.tikit{background:#1a4a8a;color:#fff}
+.tx-type.kheles{background:#196b19;color:#fff}
+.btn-reprint{background:#1a1a1a;color:#f5c518;border:1px solid #333;padding:6px 10px;border-radius:7px;font-size:11px;min-height:34px}
+.btn-reprint:active{background:#f5c518;color:#000}
+.btn-del-tx{background:#7b1e1e;color:#fff;border:none;padding:6px 10px;border-radius:7px;font-size:11px;margin-left:4px;min-height:34px}
+.btn-del-tx:active{background:#c0392b}
+.close-day-banner{background:#1a2e1a;border:1px solid #2e5a2e;border-radius:10px;padding:12px 16px;margin-bottom:14px}
+.close-day-banner p{color:#aaa;font-size:13px;line-height:1.5}
+.close-day-banner strong{color:#27ae60}
+
+/* SETTINGS MODAL */
+#settings-modal{display:none;position:fixed;inset:0;background:#000c;z-index:900;align-items:center;justify-content:center;padding:16px}
+#settings-modal.open{display:flex}
+.settings-box{background:#1a1a1a;border:2px solid #f5c518;border-radius:18px;padding:22px;width:100%;max-width:440px}
+.settings-box h3{color:#f5c518;font-size:17px;margin-bottom:18px;text-align:center}
+.setting-group{margin-bottom:14px}
+.setting-label{color:#999;font-size:12px;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.setting-input{width:100%;background:#111;border:1px solid #444;color:#fff;padding:11px 14px;border-radius:8px;font-size:15px;outline:none;min-height:46px}
+.setting-input:focus{border-color:#f5c518}
+.setting-hint{color:#555;font-size:11px;margin-top:5px;line-height:1.4}
+.printer-status{padding:9px 14px;border-radius:8px;font-size:13px;margin:12px 0;display:none;font-weight:bold}
+.printer-status.ok{background:#1a2e1a;color:#27ae60;display:block}
+.printer-status.err{background:#2e1a1a;color:#e74c3c;display:block}
+.printer-status.loading{background:#1a1a2e;color:#5090e0;display:block}
+.settings-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.btn-s{border:none;padding:12px;border-radius:10px;font-weight:900;font-size:13px;min-height:46px}
+.btn-s.gold{background:#f5c518;color:#000}
+.btn-s.gold:active{background:#ffe040}
+.btn-s.dark{background:#252525;color:#f5c518;border:1px solid #f5c518}
+.btn-s.dark:active{background:#f5c518;color:#000}
+.btn-s.full{grid-column:1/-1;background:#222;color:#aaa;border:1px solid #333;margin-top:4px}
+.btn-s.full:active{background:#333}
+.srv-info{background:#111;border:1px solid #222;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:11px;color:#666;line-height:1.8}
+.srv-info b{color:#f5c518}
+
+#install-modal{display:none;position:fixed;inset:0;background:#000a;z-index:800;align-items:flex-end;justify-content:center;padding:20px;padding-bottom:max(20px,env(safe-area-inset-bottom))}
+#install-modal.open{display:flex}
+.install-box{background:#1e1e1e;border:2px solid #f5c518;border-radius:20px;padding:24px;width:100%;max-width:480px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.install-box h3{color:#f5c518;font-size:18px;margin-bottom:16px;text-align:center}
+.install-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;padding:12px;background:#262626;border-radius:10px}
+.install-step-num{background:#f5c518;color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;flex-shrink:0;margin-top:2px}
+.install-step p{color:#ccc;font-size:13px;line-height:1.5}
+.install-step p b{color:#fff}
+.install-tabs{display:flex;gap:8px;margin-bottom:14px}
+.install-tab{flex:1;padding:9px;border-radius:8px;border:2px solid #333;background:none;color:#777;font-weight:bold;font-size:13px;min-height:42px}
+.install-tab.active{background:#f5c518;color:#000;border-color:#f5c518}
+.install-steps-ios,.install-steps-android{display:none}
+.install-steps-ios.active,.install-steps-android.active{display:block}
+.btn-close-modal{width:100%;background:#333;color:#fff;border:none;padding:12px;border-radius:10px;font-weight:bold;font-size:14px;margin-top:4px;min-height:46px}
+
+@media print{body>*:not(#receipt){display:none!important}#receipt{display:block!important;padding:10px;font-family:monospace;max-width:280px;margin:auto}}
+#receipt{display:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🍕 SNACK MAJD &nbsp;|&nbsp; Caisse</h1>
+  <div class="hdr-right">
+    <span class="dt" id="dt"></span>
+    <span class="hdr-total" id="hdr-total">Aujourd'hui: 0 DH</span>
+    <button id="btn-install" onclick="showInstallModal()">📲 Installer</button>
+    <button class="btn-settings" onclick="openSettings()" title="Parametres impression">⚙️<span class="srv-dot" id="srv-dot"></span></button>
+    <button class="btn-hdr" onclick="openDashboard()">📊 Historique</button>
+  </div>
+</div>
+
+<div class="main" id="main">
+  <div class="menu-panel" id="menu-panel">
+    <div class="cats" id="cats"></div>
+    <div class="items-grid" id="items"></div>
+  </div>
+  <div class="order-panel" id="order-panel">
+    <div class="order-hdr">
+      <div class="order-hdr-top">
+        <h2>Commande</h2>
+        <button class="btn-pick-table" id="btn-pick-table" onclick="openTablePicker()">
+          🪑 <span id="tbl-label">Choisir Table</span>
+        </button>
+      </div>
+      <div class="pending-banner hidden" id="pending-banner">
+        ⚠️ Articles en attente — choisissez une table
+      </div>
+    </div>
+    <div class="order-list" id="order-list">
+      <div class="empty-msg"><span>🛒</span>Ajoutez des articles<br>puis choisissez une table</div>
+    </div>
+    <div class="order-foot">
+      <div class="foot-row"><span>Articles:</span><span id="item-count">0</span></div>
+      <div class="foot-total"><span>TOTAL</span><span id="total">0 DH</span></div>
+      <button class="btn-tikit" id="btn-tikit" onclick="tikitWKheles()" disabled>🖨 TIKIT + KHELES</button>
+      <div class="act-btns">
+        <button class="btn-kheles" id="btn-kheles" onclick="khelesBlaTimt()" disabled>✅ Kheles sans tikit</button>
+        <button class="btn-clear" onclick="clearOrder()">🗑 Effacer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tab-bar" id="tab-bar">
+  <button class="tab-btn active" id="tab-menu" onclick="switchTab('menu')">
+    <span class="tab-icon">📋</span>Menu
+  </button>
+  <button class="tab-btn" id="tab-order" onclick="switchTab('order')">
+    <span class="tab-icon">🛒</span>
+    Commande&nbsp;<span class="tab-badge" id="tab-badge" style="display:none">0</span>
+  </button>
+</div>
+
+<div id="tbl-picker">
+  <div class="picker-hdr">
+    <h2>🪑 Choisir une Table</h2>
+    <input class="picker-search" type="number" min="1" max="100" placeholder="N°..." id="picker-search"
+      oninput="filterPickerTable(this.value)"
+      onkeydown="if(event.key==='Enter'){const v=parseInt(this.value);if(v>=1&&v<=100)pickTable(v);}">
+    <button class="btn-close-picker" onclick="closeTablePicker()">✕</button>
+  </div>
+  <div class="picker-legend">
+    <span class="leg"><span class="leg-box" style="background:#122112;border:2px solid #1e421e"></span>Libre</span>
+    <span class="leg"><span class="leg-box" style="background:#2c1e08;border:2px solid #5a3a10"></span>Occupée</span>
+    <span class="leg"><span class="leg-box" style="background:#2e2600;border:2px solid #f5c518"></span>Active</span>
+  </div>
+  <div class="picker-grid" id="picker-grid"></div>
+</div>
+
+<div id="dashboard">
+  <div class="dash-hdr">
+    <h2>📊 Historique</h2>
+    <div class="dash-nav">
+      <button class="dash-nav-btn" onclick="navDay(-1)">‹</button>
+      <span class="dash-day-label" id="dash-day-label">Aujourd'hui</span>
+      <button class="dash-nav-btn" onclick="navDay(+1)">›</button>
+    </div>
+    <div class="dash-hdr-btns">
+      <button class="dash-btn outline" onclick="printDayReport()">🖨 Rapport</button>
+      <button class="dash-btn green" onclick="closerLaNhar()">🌙 Fermer journée</button>
+      <button class="dash-btn dark" onclick="closeDashboard()">✕</button>
+    </div>
+  </div>
+  <div class="dash-stats">
+    <div class="stat-card"><div class="s-label">Total encaissé</div><div class="s-val green" id="ds-total">0</div><div class="s-unit">DH</div></div>
+    <div class="stat-card"><div class="s-label">Transactions</div><div class="s-val" id="ds-count">0</div><div class="s-unit">commandes</div></div>
+    <div class="stat-card"><div class="s-label">Articles vendus</div><div class="s-val" id="ds-items">0</div><div class="s-unit">articles</div></div>
+    <div class="stat-card"><div class="s-label">Moy. / commande</div><div class="s-val" id="ds-avg">0</div><div class="s-unit">DH</div></div>
+  </div>
+  <div class="dash-body" id="dash-body"></div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settings-modal" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-box">
+    <h3>⚙️ Paramètres Impression</h3>
+    <div class="setting-group">
+      <label class="setting-label">IP de l'imprimante WiFi</label>
+      <input class="setting-input" type="text" id="s-printer-ip" placeholder="192.168.1.100">
+      <div class="setting-hint">Imprimez une "page de configuration" depuis votre imprimante pour trouver l'IP</div>
+    </div>
+    <div class="setting-group">
+      <label class="setting-label">Largeur papier</label>
+      <select class="setting-input" id="s-paper-width">
+        <option value="42">80 mm — 42 caractères</option>
+        <option value="32">58 mm — 32 caractères</option>
+      </select>
+    </div>
+    <div id="s-status" class="printer-status"></div>
+    <div class="settings-btns">
+      <button class="btn-s dark" onclick="testPrint()">🖨 Test impression</button>
+      <button class="btn-s gold" onclick="saveSettings()">✅ Sauvegarder</button>
+      <button class="btn-s full" onclick="closeSettings()">Fermer</button>
+    </div>
+    <div class="srv-info">
+      <b>Serveur d'impression:</b> <span id="s-srv-status">non connecté</span><br>
+      Lancez <b>print_server.py</b> dans Termux pour activer l'impression directe.<br>
+      Sans serveur → impression via le système Android.
+    </div>
+  </div>
+</div>
+
+<div id="install-modal" onclick="if(event.target===this)closeInstallModal()">
+  <div class="install-box">
+    <h3>📲 Installer comme application</h3>
+    <div class="install-tabs">
+      <button class="install-tab active" id="tab-ios" onclick="setInstallTab('ios')">🍎 iPhone / iPad</button>
+      <button class="install-tab" id="tab-and" onclick="setInstallTab('android')">🤖 Android</button>
+    </div>
+    <div class="install-steps-ios active" id="steps-ios">
+      <div class="install-step"><div class="install-step-num">1</div><p>Ouvrez dans <b>Safari</b></p></div>
+      <div class="install-step"><div class="install-step-num">2</div><p>Appuyez sur <b>Partager ⬆️</b></p></div>
+      <div class="install-step"><div class="install-step-num">3</div><p><b>"Sur l'écran d'accueil"</b></p></div>
+      <div class="install-step"><div class="install-step-num">4</div><p>Appuyez <b>"Ajouter"</b> ✅</p></div>
+    </div>
+    <div class="install-steps-android" id="steps-android">
+      <div class="install-step"><div class="install-step-num">1</div><p>Ouvrez dans <b>Chrome</b></p></div>
+      <div class="install-step"><div class="install-step-num">2</div><p>3 points <b>⋮</b> en haut</p></div>
+      <div class="install-step"><div class="install-step-num">3</div><p><b>"Ajouter à l'écran d'accueil"</b></p></div>
+      <div class="install-step"><div class="install-step-num">4</div><p>Appuyez <b>"Ajouter"</b> ✅</p></div>
+    </div>
+    <button class="btn-close-modal" onclick="closeInstallModal()">Fermer</button>
+  </div>
+</div>
+
+<div id="receipt"></div>
+
+<script>
+// ══ PWA ══════════════════════════════════════
+(function(){
+  const SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="90" fill="#f5c518"/><text x="256" y="290" font-family="Arial Black,Arial" font-size="230" font-weight="900" text-anchor="middle" fill="#000" dominant-baseline="middle">SM</text><text x="256" y="420" font-family="Arial Black,Arial" font-size="65" font-weight="700" text-anchor="middle" fill="#222">CAISSE</text></svg>`;
+  const ic='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(SVG);
+  document.getElementById('ati').href=ic;
+  try{
+    const m={name:"Snack Majd — Caisse",short_name:"Snack Majd",start_url:".",display:"standalone",background_color:"#111",theme_color:"#f5c518",orientation:"any",icons:[{src:ic,sizes:"512x512",type:"image/svg+xml",purpose:"any maskable"}]};
+    document.getElementById('mfst').href=URL.createObjectURL(new Blob([JSON.stringify(m)],{type:'application/json'}));
+  }catch(e){}
+  if('serviceWorker' in navigator){
+    const SW=`const C='smajd-v4';self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(clients.claim()));self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.open(C).then(cache=>fetch(e.request).then(r=>{if(r&&r.status===200)cache.put(e.request,r.clone());return r;}).catch(()=>caches.match(e.request))));});`;
+    try{navigator.serviceWorker.register(URL.createObjectURL(new Blob([SW],{type:'text/javascript'}))).catch(()=>{});}catch(e){}
+  }
+})();
+let installPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;document.getElementById('btn-install').style.display='flex';});
+window.addEventListener('appinstalled',()=>{document.getElementById('btn-install').style.display='none';installPrompt=null;});
+function showInstallModal(){
+  if(installPrompt){installPrompt.prompt();installPrompt.userChoice.then(r=>{if(r.outcome==='accepted')document.getElementById('btn-install').style.display='none';installPrompt=null;});return;}
+  document.getElementById('install-modal').classList.add('open');
+  setInstallTab(/iPad|iPhone|iPod/.test(navigator.userAgent)?'ios':'android');
+}
+function closeInstallModal(){document.getElementById('install-modal').classList.remove('open');}
+function setInstallTab(t){['ios','android'].forEach(x=>{document.getElementById('tab-'+x).classList.toggle('active',x===t);document.getElementById('steps-'+x).classList.toggle('active',x===t);});}
+
+// ══ DIRECT PRINT ═════════════════════════════
+const PRINT_SRV = 'http://localhost:8765';
+let printerIP  = localStorage.getItem('smajd_prt_ip')  || '';
+let paperWidth = parseInt(localStorage.getItem('smajd_prt_w') || '42');
+let srvOnline  = false;
+
+async function checkServer(){
+  try{
+    const r=await fetch(PRINT_SRV+'/ping',{signal:AbortSignal.timeout(1500)});
+    if(r.ok){ srvOnline=true; document.getElementById('srv-dot').className='srv-dot on';
+      document.getElementById('s-srv-status').textContent='connecte ✅';
+      // sync settings to server
+      if(printerIP) fetch(PRINT_SRV+'/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip:printerIP,width:paperWidth})}).catch(()=>{});
+      return true;
+    }
+  }catch(e){}
+  srvOnline=false;
+  document.getElementById('srv-dot').className='srv-dot';
+  document.getElementById('s-srv-status').textContent='non connecte';
+  return false;
+}
+
+async function directPrint(entry){
+  if(!srvOnline) return false;
+  try{
+    const r=await fetch(PRINT_SRV+'/print',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...entry,width:paperWidth}),signal:AbortSignal.timeout(5000)});
+    return r.ok;
+  }catch(e){return false;}
+}
+
+function openSettings(){
+  document.getElementById('s-printer-ip').value=printerIP;
+  document.getElementById('s-paper-width').value=String(paperWidth);
+  const st=document.getElementById('s-status'); st.className='printer-status'; st.textContent='';
+  checkServer();
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+function saveSettings(){
+  printerIP  = document.getElementById('s-printer-ip').value.trim();
+  paperWidth = parseInt(document.getElementById('s-paper-width').value);
+  localStorage.setItem('smajd_prt_ip',printerIP);
+  localStorage.setItem('smajd_prt_w',String(paperWidth));
+  if(srvOnline) fetch(PRINT_SRV+'/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip:printerIP,width:paperWidth})}).catch(()=>{});
+  const st=document.getElementById('s-status'); st.textContent='Sauvegarde !'; st.className='printer-status ok';
+  setTimeout(closeSettings,1000);
+}
+async function testPrint(){
+  const st=document.getElementById('s-status');
+  const ip=document.getElementById('s-printer-ip').value.trim()||printerIP;
+  const w=parseInt(document.getElementById('s-paper-width').value);
+  st.textContent='Test en cours...'; st.className='printer-status loading';
+  try{
+    const r=await fetch(PRINT_SRV+'/test',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ip,width:w}),signal:AbortSignal.timeout(6000)});
+    if(r.ok){st.textContent='Imprime ! Verifiez l imprimante.'; st.className='printer-status ok';}
+    else{const j=await r.json(); st.textContent='Erreur: '+j.error; st.className='printer-status err';}
+  }catch(e){
+    st.textContent='Serveur non actif. Lancez print_server.py dans Termux.'; st.className='printer-status err';
+  }
+}
+
+// Check server on load + every 10s
+checkServer(); setInterval(checkServer, 10000);
+
+// ══ PORTRAIT ═════════════════════════════════
+let portraitTab='menu';
+function switchTab(tab){
+  portraitTab=tab;
+  document.getElementById('menu-panel').classList.toggle('portrait-hidden',tab!=='menu');
+  document.getElementById('order-panel').classList.toggle('portrait-active',tab==='order');
+  document.getElementById('tab-menu').classList.toggle('active',tab==='menu');
+  document.getElementById('tab-order').classList.toggle('active',tab==='order');
+}
+
+// ══ MENU DATA ════════════════════════════════
+const MENU={
+  "🍕 Pizza":[
+    {n:"Pizza Margherita",p:15,g:20},{n:"Pizza Dand Fumee",p:20,g:25},
+    {n:"Pizza Thon",p:20,g:25},{n:"Pizza Poulet",p:20,g:25},
+    {n:"Pizza Sousite",p:20,g:25},{n:"Pizza Kafta",p:25,g:30},
+    {n:"Pizza Mixte",p:25,g:30},{n:"Pizza Royale",p:30,g:40},
+    {n:"Pizza 4 Saison",p:30,g:40},{n:"Pizza Fruit De Mer",p:35,g:45},
+    {n:"Pizza 4 Fromage",p:25,g:30},
+  ],
+  "🥘 Pasticcio":[
+    {n:"Pasticcio Poulet",p:25,g:30},{n:"Pasticcio Kafta",p:30,g:35},
+    {n:"Pasticcio Sousite",p:25,g:30},{n:"Pasticcio Dande Fumee",p:25,g:30},
+    {n:"Pasticcio Fruit De Mer",p:35,g:40},{n:"Pasticcio Royale",p:35,g:40},
+    {n:"Pasticcio Mixte",p:30,g:35},
+  ],
+  "🌯 Tacos":[
+    {n:"Tacos Poulet",p:25,g:30},{n:"Tacos Kafta",p:25,g:30},
+    {n:"Tacos Sousite",p:25,g:30},{n:"Tacos Mixte",p:30,g:35},
+    {n:"Tacos Nuggets",p:30,g:35},{n:"Tacos Fruit De Mer",p:35,g:40},
+    {n:"Tacos Royale",p:35,g:40},
+  ],
+  "🥖 Sandwichs":[
+    {n:"Sandwish Jambon",p:15,g:20},{n:"Sandwish Poulet",p:15,g:20},
+    {n:"Sandwish Kafta",p:20,g:25},{n:"Sandwish Mixte",p:20,g:25},
+    {n:"Sandwish Thon",p:15,g:20},{n:"Sandwish Sousite",p:15,g:20},
+    {n:"Sandwish Fruit De Mer",p:25,g:30},
+  ],
+  "🍔 Burgers":[
+    {n:"Burger Thon",s:20},{n:"Burger Chees",s:25},
+    {n:"Burger Cheken",s:26},{n:"Burger Eggs Chees",s:26},
+    {n:"Burger Double",s:35},
+  ],
+  "🍽 Les Plats":[
+    {n:"Plat Poulet",p:25,g:30},{n:"Plat Nuggets",p:30,g:35},
+    {n:"Plat Kafta",p:25,g:30},{n:"Plat Sousite",p:25,g:30},
+    {n:"Plat Mixte",p:30,g:35},
+  ],
+  "🥙 Panini":[
+    {n:"Panini Poulet",p:15,g:20},{n:"Panini Kafta",p:20,g:25},
+    {n:"Panini Mixte",p:20,g:25},{n:"Panini Thon",p:15,g:20},
+    {n:"Panini Sousite",p:15,g:20},{n:"Panini Fruit De Mer",p:25,g:30},
+    {n:"Panini Jambon",p:15,g:20},
+  ],
+  "🌶 Plat Cha3bi":[
+    {n:"Bocadillo Plas",s:15},{n:"Bocadillo",s:12},
+    {n:"Tortilla Plas",s:15},{n:"Sandwich Tortilla",s:12},
+  ],
+  "🥗 Salade":[
+    {n:"Salade Marocaine",p:10,g:15},{n:"Salade Normal",s:12},
+    {n:"Salade Mexicane",p:13,g:18},{n:"Extra Frit",s:10},
+  ],
+  "🥤 Boissons":[
+    {n:"Jus Peche",p:12,g:17},{n:"Jus Zaazaa",p:25,g:30},
+    {n:"Jus Exotique",p:18,g:23},{n:"Jus Avocat Amandes",p:18,g:23},
+    {n:"Jus Royale",p:15,g:20},{n:"Jus Fraise",p:12,g:17},
+    {n:"Salad Fruit",p:15,g:20},{n:"Eau",p:4,g:7},
+    {n:"Soda",s:6},{n:"Jus Panache Lait",p:12,g:17},
+    {n:"Jus Panache Orange",p:13,g:18},{n:"Jus Avocat",p:15,g:20},
+    {n:"Jus Banane",p:10,g:15},{n:"Jus Pomme",p:10,g:15},
+    {n:"Jus Orange",p:15,g:20},{n:"Jus Ananas",p:15,g:20},
+    {n:"Jus Mange",p:15,g:20},{n:"Jus Kaki",p:15,g:20},
+    {n:"Jus D avocat",p:20,g:25},{n:"Fruit Sec",p:20,g:25},
+  ],
+};
+
+// ══ STORAGE ══════════════════════════════════
+let dailyHistory={},txCounter=0;
+try{const h=localStorage.getItem('smajd_h');if(h)dailyHistory=JSON.parse(h);const t=localStorage.getItem('smajd_tx');if(t)txCounter=parseInt(t)||0;}catch(e){}
+function saveStorage(){try{localStorage.setItem('smajd_h',JSON.stringify(dailyHistory));localStorage.setItem('smajd_tx',String(txCounter));}catch(e){}}
+function todayKey(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function todayTotal(){return(dailyHistory[todayKey()]||[]).reduce((s,t)=>s+t.total,0);}
+
+// ══ STATE ════════════════════════════════════
+let activeTable=null,activeCategory=Object.keys(MENU)[0];
+const tableOrders={};
+let stagingOrder=[];
+function activeOrder(){return activeTable?(tableOrders[activeTable]||[]):stagingOrder;}
+function setActiveOrder(a){if(activeTable)tableOrders[activeTable]=a;else stagingOrder=a;}
+
+// ══ INIT ═════════════════════════════════════
+renderCats();renderItems(activeCategory);renderOrder();updateHdrTotal();
+tick();setInterval(tick,1000);
+function tick(){document.getElementById('dt').textContent=new Date().toLocaleString('fr-FR');}
+function updateHdrTotal(){document.getElementById('hdr-total').textContent='Aujourd\'hui: '+todayTotal()+' DH';}
+
+// ══ MENU ═════════════════════════════════════
+function renderCats(){
+  const el=document.getElementById('cats');el.innerHTML='';
+  Object.keys(MENU).forEach(cat=>{
+    const b=document.createElement('button');
+    b.className='cat-btn'+(cat===activeCategory?' active':'');
+    b.textContent=cat;
+    b.onclick=()=>{activeCategory=cat;renderCats();renderItems(cat);};
+    el.appendChild(b);
+  });
+}
+function renderItems(cat){
+  const el=document.getElementById('items');el.innerHTML='';
+  MENU[cat].forEach((item,idx)=>{
+    const card=document.createElement('div');card.className='menu-card';
+    const btns=item.s!==undefined
+      ?`<button class="single-btn" data-cat="${cat}" data-idx="${idx}" data-sz="">➕ ${item.s} DH</button>`
+      :`<div class="size-btns"><button class="size-btn" data-cat="${cat}" data-idx="${idx}" data-sz="P">P ${item.p}DH</button><button class="size-btn" data-cat="${cat}" data-idx="${idx}" data-sz="G">G ${item.g}DH</button></div>`;
+    card.innerHTML=`<h3>${item.n}</h3>${btns}`;
+    el.appendChild(card);
+  });
+  el.querySelectorAll('[data-cat]').forEach(b=>b.addEventListener('click',e=>{
+    const{cat,idx,sz}=e.currentTarget.dataset;
+    addItem(cat,parseInt(idx),sz);
+    if(window.innerHeight>window.innerWidth)switchTab('order');
+  }));
+}
+
+// ══ ORDER ════════════════════════════════════
+function addItem(cat,idx,sz){
+  const item=MENU[cat][idx];
+  const price=sz==='P'?item.p:sz==='G'?item.g:item.s;
+  const key=cat+'|'+idx+'|'+sz;
+  const arr=activeOrder();
+  const ex=arr.find(r=>r.key===key);
+  if(ex){ex.qty++;}else{arr.push({key,name:item.n,size:sz,price,qty:1});}
+  renderOrder();
+}
+function changeQty(key,d){
+  let arr=activeOrder();const r=arr.find(x=>x.key===key);if(!r)return;
+  r.qty+=d;if(r.qty<=0)arr=arr.filter(x=>x.key!==key);
+  setActiveOrder(arr);renderOrder();
+}
+function removeItem(key){setActiveOrder(activeOrder().filter(x=>x.key!==key));renderOrder();}
+function clearOrder(){
+  if(activeOrder().length===0)return;
+  if(!confirm('Effacer la commande ?'))return;
+  setActiveOrder([]);renderOrder();
+  if(activeTable)refreshPickerBtn(activeTable);
+}
+
+function renderOrder(){
+  const rows=activeOrder(),el=document.getElementById('order-list');
+  document.getElementById('pending-banner').classList.toggle('hidden',!(stagingOrder.length>0&&!activeTable));
+  const btn=document.getElementById('btn-pick-table'),lbl=document.getElementById('tbl-label');
+  if(activeTable){btn.className='btn-pick-table has-table';lbl.textContent='Table '+activeTable;}
+  else{btn.className='btn-pick-table';lbl.textContent='Choisir Table';}
+  const canAct=!!(activeTable&&rows.length>0);
+  document.getElementById('btn-tikit').disabled=!canAct;
+  document.getElementById('btn-kheles').disabled=!canAct;
+  const totalQty=rows.reduce((s,r)=>s+r.qty,0);
+  const badge=document.getElementById('tab-badge');
+  badge.style.display=totalQty>0?'inline':'none';badge.textContent=totalQty;
+  if(rows.length===0){
+    el.innerHTML=activeTable
+      ?'<div class="empty-msg"><span>🍽</span>Table '+activeTable+'<br>— Libre —</div>'
+      :'<div class="empty-msg"><span>🛒</span>Ajoutez des articles<br>puis choisissez une table</div>';
+    setFooter(0,0);return;
+  }
+  let html='',total=0,count=0;
+  rows.forEach(r=>{
+    const sub=r.price*r.qty;total+=sub;count+=r.qty;
+    html+=`<div class="order-row"><div class="row-info"><div class="row-name">${r.name}${r.size?' ('+r.size+')':''}</div><div class="row-price">${r.price} DH × ${r.qty} = <strong>${sub} DH</strong></div></div><div class="qty-ctrl"><button class="q-btn" data-key="${r.key}" data-d="-1">−</button><span class="q-num">${r.qty}</span><button class="q-btn" data-key="${r.key}" data-d="1">+</button></div><button class="del-btn" data-key="${r.key}">×</button></div>`;
+  });
+  el.innerHTML=html;
+  el.querySelectorAll('.q-btn').forEach(b=>b.addEventListener('click',e=>{changeQty(e.currentTarget.dataset.key,parseInt(e.currentTarget.dataset.d));}));
+  el.querySelectorAll('.del-btn').forEach(b=>b.addEventListener('click',e=>{removeItem(e.currentTarget.dataset.key);}));
+  setFooter(total,count);
+}
+function setFooter(total,count){document.getElementById('total').textContent=total+' DH';document.getElementById('item-count').textContent=count;}
+
+// ══ RECORD ═══════════════════════════════════
+function recordOrder(type){
+  if(!activeTable)return null;
+  const rows=tableOrders[activeTable]||[];if(!rows.length)return null;
+  const total=rows.reduce((s,r)=>s+r.price*r.qty,0);
+  const key=todayKey();if(!dailyHistory[key])dailyHistory[key]=[];
+  txCounter++;
+  const now=new Date();
+  const entry={id:txCounter,table:activeTable,type,time:now.toISOString(),
+    timeStr:now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),
+    dateStr:now.toLocaleDateString('fr-FR'),items:JSON.parse(JSON.stringify(rows)),total};
+  dailyHistory[key].push(entry);saveStorage();
+  const prev=activeTable;tableOrders[activeTable]=[];activeTable=null;
+  renderOrder();refreshPickerBtn(prev);updateHdrTotal();
+  return entry;
+}
+
+// ══ TIKIT + KHELES (direct print, no confirm) ══
+async function tikitWKheles(){
+  if(!activeTable||!(tableOrders[activeTable]||[]).length)return;
+  const entry=recordOrder('tikit');if(!entry)return;
+  const ok=await directPrint(entry);
+  if(!ok){printEntry(entry);}  // fallback: window.print()
+  else{flash('🖨 Imprime !','#1a4a8a');}
+}
+function khelesBlaTimt(){
+  if(!activeTable||!(tableOrders[activeTable]||[]).length)return;
+  const total=(tableOrders[activeTable]||[]).reduce((s,r)=>s+r.price*r.qty,0);
+  if(!confirm('Enregistrer '+total+' DH — Table '+activeTable+' ?'))return;
+  recordOrder('kheles');
+  flash('✅ Enregistre !','#196b19');
+}
+function flash(msg,bg){
+  const lbl=document.getElementById('tbl-label'),btn=document.getElementById('btn-pick-table');
+  btn.className='btn-pick-table has-table';btn.style.background=bg;lbl.textContent=msg;
+  setTimeout(()=>{btn.style.background='';btn.className='btn-pick-table';lbl.textContent='Choisir Table';renderOrder();},1800);
+}
+
+// ══ TABLE PICKER ═════════════════════════════
+function openTablePicker(){buildPickerGrid();document.getElementById('picker-search').value='';document.getElementById('tbl-picker').classList.add('open');}
+function closeTablePicker(){document.getElementById('tbl-picker').classList.remove('open');}
+function buildPickerGrid(){
+  const grid=document.getElementById('picker-grid');grid.innerHTML='';
+  for(let i=1;i<=100;i++){
+    const div=document.createElement('div');
+    div.className='ptbl'+(i===activeTable?' active-tbl':tableHasItems(i)?' occupied':'');
+    div.id='ptbl'+i;
+    const tot=tableHasItems(i)?calcTableTotal(i):0;
+    div.innerHTML=`<span class="ptbl-num">${i}</span><span class="ptbl-status">${i===activeTable?'Active':tableHasItems(i)?tot+' DH':'Libre'}</span>`;
+    div.onclick=()=>pickTable(i);grid.appendChild(div);
+  }
+}
+function refreshPickerBtn(n){
+  const div=document.getElementById('ptbl'+n);if(!div)return;
+  div.className='ptbl'+(n===activeTable?' active-tbl':tableHasItems(n)?' occupied':'');
+  const tot=tableHasItems(n)?calcTableTotal(n):0;
+  div.innerHTML=`<span class="ptbl-num">${n}</span><span class="ptbl-status">${n===activeTable?'Active':tableHasItems(n)?tot+' DH':'Libre'}</span>`;
+}
+function pickTable(n){
+  const prev=activeTable;
+  if(stagingOrder.length>0){
+    if(!tableOrders[n])tableOrders[n]=[];
+    stagingOrder.forEach(item=>{const ex=tableOrders[n].find(r=>r.key===item.key);if(ex){ex.qty+=item.qty;}else{tableOrders[n].push({...item});}});
+    stagingOrder=[];
+  }
+  activeTable=n;closeTablePicker();renderOrder();
+  if(prev&&prev!==n)refreshPickerBtn(prev);refreshPickerBtn(n);
+}
+function filterPickerTable(val){document.querySelectorAll('.ptbl').forEach((el,i)=>{el.style.display=(!val||String(i+1).startsWith(val))?'':'none';});}
+function tableHasItems(n){return tableOrders[n]&&tableOrders[n].length>0;}
+function calcTableTotal(n){return(tableOrders[n]||[]).reduce((s,r)=>s+r.price*r.qty,0);}
+
+// ══ DASHBOARD ════════════════════════════════
+let dashViewKey=todayKey();
+function openDashboard(){dashViewKey=todayKey();renderDashboard();document.getElementById('dashboard').classList.add('open');}
+function closeDashboard(){document.getElementById('dashboard').classList.remove('open');}
+function navDay(dir){
+  let keys=[...new Set([...Object.keys(dailyHistory),todayKey()])].sort();
+  let idx=keys.indexOf(dashViewKey);if(idx===-1)idx=keys.length-1;
+  idx=Math.max(0,Math.min(keys.length-1,idx+dir));dashViewKey=keys[idx];renderDashboard();
+}
+function renderDashboard(){
+  const key=dashViewKey,today=todayKey(),txs=dailyHistory[key]||[];
+  const[y,m,d]=key.split('-');
+  document.getElementById('dash-day-label').textContent=key===today?'Aujourd\'hui':d+'/'+m+'/'+y;
+  const grandTotal=txs.reduce((s,t)=>s+t.total,0);
+  const totalItems=txs.reduce((s,t)=>s+t.items.reduce((si,r)=>si+r.qty,0),0);
+  const avg=txs.length?Math.round(grandTotal/txs.length):0;
+  document.getElementById('ds-total').textContent=grandTotal;
+  document.getElementById('ds-count').textContent=txs.length;
+  document.getElementById('ds-items').textContent=totalItems;
+  document.getElementById('ds-avg').textContent=avg;
+  const body=document.getElementById('dash-body');
+  if(txs.length===0){body.innerHTML='<div class="dash-empty">Aucune transaction'+(key===today?' aujourd\'hui.':" le "+d+'/'+m+'/'+y+'.')+'</div>';return;}
+  let banner='';
+  if(key===today)banner=`<div class="close-day-banner"><p>Aujourd'hui: <strong>${grandTotal} DH</strong> &nbsp;·&nbsp; ${txs.length} transaction(s)</p></div>`;
+  const rows=[...txs].reverse().map(tx=>{
+    const its=tx.items.map(r=>`${r.name}${r.size?' ('+r.size+')':''} ×${r.qty}`).join(' · ');
+    const badge=tx.type==='tikit'?'<span class="tx-type tikit">Tikit</span>':'<span class="tx-type kheles">Kheles</span>';
+    return `<tr><td><span class="tx-id">#${tx.id}</span><br><span class="tx-time">${tx.timeStr||''}</span></td><td><span class="tx-tbl">Table ${tx.table}</span>${badge}</td><td><div class="tx-items">${its}</div></td><td><span class="tx-total">${tx.total} DH</span></td><td style="white-space:nowrap">${tx.type==='tikit'?`<button class="btn-reprint" onclick="reprintEntry('${key}',${tx.id})">🖨</button>`:''}<button class="btn-del-tx" onclick="deleteTx('${key}',${tx.id})">×</button></td></tr>`;
+  }).join('');
+  body.innerHTML=banner+`<table class="trans-table"><thead><tr><th>N° / Heure</th><th>Table</th><th>Articles</th><th>Total</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function deleteTx(key,id){
+  if(!confirm('Supprimer ?'))return;
+  dailyHistory[key]=(dailyHistory[key]||[]).filter(t=>t.id!==id);
+  if(!dailyHistory[key].length)delete dailyHistory[key];
+  saveStorage();updateHdrTotal();renderDashboard();
+}
+function reprintEntry(key,id){const tx=(dailyHistory[key]||[]).find(t=>t.id===id);if(tx)printEntry(tx);}
+function closerLaNhar(){
+  const key=todayKey(),txs=dailyHistory[key]||[];
+  const total=txs.reduce((s,t)=>s+t.total,0);
+  if(!confirm('Resume du jour:\n\nTransactions : '+txs.length+'\nTotal encaisse : '+total+' DH\n\nFermer la journee ?'))return;
+  alert('Journee fermee. Bonne nuit !');closeDashboard();
+}
+
+// ══ PRINT (fallback window.print) ════════════
+function printEntry(entry){
+  let lines='';
+  entry.items.forEach(r=>{const sub=r.price*r.qty;lines+=`<tr><td>${r.name}${r.size?' ('+r.size+')':''}</td><td align="center">${r.qty}</td><td align="right">${r.price}</td><td align="right">${sub}</td></tr>`;});
+  buildAndPrint(`<div style="text-align:center;font-size:18px;font-weight:900;letter-spacing:2px">SNACK MAJD</div><div style="text-align:center;font-size:11px">Tacos Pasticcio Pizza Panini Jus</div><div style="text-align:center;font-size:11px">Tel: 07.78.06.54.56</div><hr style="border:1px dashed #000;margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:12px"><b>Table ${entry.table}</b><span>${entry.dateStr||''} ${entry.timeStr||''}</span></div><div style="font-size:10px;color:#888">Ticket N ${entry.id}</div><hr style="border:1px dashed #000;margin:6px 0"><table style="width:100%;font-size:12px;border-collapse:collapse"><thead><tr style="border-bottom:1px solid #000"><th align="left">Article</th><th>Qte</th><th align="right">PU</th><th align="right">Total</th></tr></thead><tbody>${lines}</tbody></table><hr style="border:1px dashed #000;margin:6px 0"><div style="text-align:right;font-size:16px;font-weight:900">TOTAL: ${entry.total} DH</div><hr style="border:1px dashed #000;margin:6px 0"><div style="text-align:center;font-size:12px">Merci de votre visite!</div>`);
+}
+function printDayReport(){
+  const key=dashViewKey,txs=dailyHistory[key]||[];
+  if(!txs.length){alert('Aucune transaction !');return;}
+  const grandTotal=txs.reduce((s,t)=>s+t.total,0);
+  const totalItems=txs.reduce((s,t)=>s+t.items.reduce((si,r)=>si+r.qty,0),0);
+  const[y,m,d]=key.split('-');
+  let rows=txs.map(tx=>{const its=tx.items.map(r=>`${r.name}${r.size?' ('+r.size+')':''} x${r.qty}`).join(', ');return `<tr style="border-bottom:1px solid #eee"><td>#${tx.id}</td><td>${tx.timeStr||''}</td><td>Table ${tx.table}</td><td style="font-size:10px">${its}</td><td align="right"><b>${tx.total} DH</b></td></tr>`;}).join('');
+  buildAndPrint(`<div style="text-align:center;font-size:18px;font-weight:900">SNACK MAJD</div><div style="text-align:center;font-size:11px">Rapport - ${d}/${m}/${y}</div><hr style="border:1px dashed #000;margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:12px"><span>Transactions: <b>${txs.length}</b></span><span>Articles: <b>${totalItems}</b></span></div><hr style="border:1px dashed #000;margin:6px 0"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="border-bottom:1px solid #000"><th>N</th><th>Heure</th><th>Table</th><th>Articles</th><th align="right">Total</th></tr></thead><tbody>${rows}</tbody></table><hr style="border:2px solid #000;margin:8px 0"><div style="text-align:right;font-size:18px;font-weight:900">TOTAL: ${grandTotal} DH</div>`);
+}
+function buildAndPrint(html){
+  document.getElementById('receipt').innerHTML=`<div style="font-family:monospace;max-width:340px;margin:auto;padding:10px">${html}</div>`;
+  window.print();
+}
+</script>
+</body>
+</html>
